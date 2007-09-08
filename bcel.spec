@@ -5,10 +5,10 @@
 
 Name:           bcel
 Version:        5.2
-Release:        %mkrel 1.2
+Release:        %mkrel 1.3
 Epoch:          0
 Summary:        Byte Code Engineering Library
-License:        Apache License
+License:        ASL 2.0
 Source0:        http://www.apache.org/dist/jakarta/bcel/source/bcel-5.2-src.tar.gz
 URL:            http://jakarta.apache.org/%{name}/
 Group:          Development/Java
@@ -121,5 +121,4 @@ fi
 %defattr(0644,root,root,0755)
 %doc docs/*
 %endif
-
 
