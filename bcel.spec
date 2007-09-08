@@ -64,7 +64,7 @@ Documentation for %{name}.
 %setup -q
 
 %build
-export CLASSPATH=%(build-classpath regexp)
+export CLASSPATH=$(build-classpath regexp)
 export OPT_JAR_LIST="ant/ant-nodeps"
 %{ant} -Dbuild.dest=./build -Dbuild.dir=./build -Dname=%{name} compile jar javadoc
 
