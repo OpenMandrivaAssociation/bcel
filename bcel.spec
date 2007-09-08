@@ -5,7 +5,7 @@
 
 Name:           bcel
 Version:        5.2
-Release:        %mkrel 1.3
+Release:        %mkrel 1.4
 Epoch:          0
 Summary:        Byte Code Engineering Library
 License:        ASL 2.0
