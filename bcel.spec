@@ -5,11 +5,21 @@
 
 Name:           bcel
 Version:        5.2
-Release:        %mkrel 1.5
+Release:        %mkrel 3.0.1
 Epoch:          0
 Summary:        Byte Code Engineering Library
-License:        ASL 2.0
-Source0:        http://www.apache.org/dist/jakarta/bcel/source/bcel-5.2-src.tar.gz
+License:        Apache Software License
+Source0:        http://www.apache.org/dist/jakarta/%{name}/source/%{name}-%{version}-src.tar.gz
+Source1:        pom-maven2jpp-depcat.xsl
+Source2:        pom-maven2jpp-newdepmap.xsl
+Source3:        pom-maven2jpp-mapdeps.xsl
+Source4:        %{name}-%{version}-jpp-depmap.xml
+Source5:        commons-build.tar.gz
+Source6:        %{name}-%{version}-build.xml
+Source7:        %{name}-%{version}.pom
+
+Patch0:         %{name}-%{version}-project_properties.patch
+
 URL:            http://jakarta.apache.org/%{name}/
 Group:          Development/Java
 #Vendor:         JPackage Project
@@ -17,6 +27,8 @@ Group:          Development/Java
 Requires:       regexp
 BuildRequires:  ant
 BuildRequires:  ant-nodeps
+BuildRequires:  ant-junit
+BuildRequires:  junit
 BuildRequires:  jpackage-utils >= 0:1.5
 BuildRequires:  regexp
 %if %{gcj_support}
@@ -60,10 +72,14 @@ Documentation for %{name}.
 
 %prep
 %setup -q
+gzip -dc %{SOURCE5} | tar xf -
+%remove_java_binaries
+cp %{SOURCE6} build.xml
+%patch0 -b .sav
 
 %build
 export CLASSPATH=$(build-classpath regexp)
-export OPT_JAR_LIST="ant/ant-nodeps"
+export OPT_JAR_LIST="ant/ant-nodeps ant/ant-junit junit"
 %{ant} -Dbuild.dest=./build -Dbuild.dir=./build -Dname=%{name} compile jar javadoc
 
 %install
@@ -72,6 +88,17 @@ export OPT_JAR_LIST="ant/ant-nodeps"
 %{__mkdir_p} %{buildroot}%{_javadir}
 %{__install} -m 644 target/bcel-%{version}.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
 (cd %{buildroot}%{_javadir} && for jar in *-%{version}*; do %{__ln_s} ${jar} `echo $jar| sed  "s|-%{version}||g"`; done)
+
+# depmap frags
+%add_to_maven_depmap %{name} %{name} %{version} JPP %{name}
+%add_to_maven_depmap org.apache.bcel %{name} %{version} JPP %{name}
+# pom
+%{__mkdir_p} %{buildroot}%{_datadir}/maven2/poms
+%{__install} -m 0644 %{SOURCE7} \
+    %{buildroot}%{_datadir}/maven2/poms/JPP-%{name}.pom
+%{__mkdir_p} %{buildroot}%{_datadir}/maven2/default_poms
+%{__install} -m 0644 %{SOURCE7} \
+    %{buildroot}%{_datadir}/maven2/default_poms/JPP-%{name}.pom
 # javadoc
 %{__mkdir_p} %{buildroot}%{_javadocdir}/%{name}-%{version}
 %{__cp} -a dist/docs/api/* %{buildroot}%{_javadocdir}/%{name}-%{version}
@@ -84,11 +111,16 @@ export OPT_JAR_LIST="ant/ant-nodeps"
 %clean
 %{__rm} -rf %{buildroot}
 
-%if %{gcj_support}
+
 %post
+%update_maven_depmap
+%if %{gcj_support}
 %{update_gcjdb}
+%endif
 
 %postun
+%update_maven_depmap
+%if %{gcj_support}
 %{clean_gcjdb}
 %endif
 
@@ -105,6 +137,9 @@ fi
 %defattr(0644,root,root,0755)
 %doc LICENSE.txt 
 %{_javadir}/*
+%{_datadir}/maven2/poms/*
+%{_datadir}/maven2/default_poms/*
+%{_mavendepmapfragdir}
 %if %{gcj_support}
 %dir %{_libdir}/gcj/%{name}
 %attr(-,root,root) %{_libdir}/gcj/%{name}/*
