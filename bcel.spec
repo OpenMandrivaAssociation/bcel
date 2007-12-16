@@ -5,7 +5,7 @@
 
 Name:           bcel
 Version:        5.2
-Release:        %mkrel 3.0.1
+Release:        %mkrel 3.0.2
 Epoch:          0
 Summary:        Byte Code Engineering Library
 License:        Apache Software License
@@ -29,7 +29,7 @@ BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  ant-junit
 BuildRequires:  junit
-BuildRequires:  jpackage-utils >= 0:1.5
+BuildRequires:  java-rpmbuild >= 0:1.5
 BuildRequires:  regexp
 %if %{gcj_support}
 BuildRequires:  java-gcj-compat-devel
