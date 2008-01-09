@@ -5,7 +5,7 @@
 
 Name:           bcel
 Version:        5.2
-Release:        %mkrel 3.0.2
+Release:        %mkrel 3.0.3
 Epoch:          0
 Summary:        Byte Code Engineering Library
 License:        Apache Software License
@@ -96,9 +96,9 @@ export OPT_JAR_LIST="ant/ant-nodeps ant/ant-junit junit"
 %{__mkdir_p} %{buildroot}%{_datadir}/maven2/poms
 %{__install} -m 0644 %{SOURCE7} \
     %{buildroot}%{_datadir}/maven2/poms/JPP-%{name}.pom
-%{__mkdir_p} %{buildroot}%{_datadir}/maven2/default_poms
-%{__install} -m 0644 %{SOURCE7} \
-    %{buildroot}%{_datadir}/maven2/default_poms/JPP-%{name}.pom
+#%{__mkdir_p} %{buildroot}%{_datadir}/maven2/default_poms
+#%{__install} -m 0644 %{SOURCE7} \
+#    %{buildroot}%{_datadir}/maven2/default_poms/JPP-%{name}.pom
 # javadoc
 %{__mkdir_p} %{buildroot}%{_javadocdir}/%{name}-%{version}
 %{__cp} -a dist/docs/api/* %{buildroot}%{_javadocdir}/%{name}-%{version}
@@ -124,21 +124,12 @@ export OPT_JAR_LIST="ant/ant-nodeps ant/ant-junit junit"
 %{clean_gcjdb}
 %endif
 
-%post javadoc
-%{__rm} -f %{_javadocdir}/%{name}
-%{__ln_s} %{name}-%{version} %{_javadocdir}/%{name}
-
-%postun javadoc
-if [ "$1" = "0" ]; then
-    %{__rm} -f %{_javadocdir}/%{name}
-fi
-
 %files
 %defattr(0644,root,root,0755)
 %doc LICENSE.txt 
 %{_javadir}/*
 %{_datadir}/maven2/poms/*
-%{_datadir}/maven2/default_poms/*
+#%{_datadir}/maven2/default_poms/*
 %{_mavendepmapfragdir}
 %if %{gcj_support}
 %dir %{_libdir}/gcj/%{name}
