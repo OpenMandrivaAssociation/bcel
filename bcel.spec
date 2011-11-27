@@ -39,7 +39,7 @@
 
 Name:           bcel
 Version:        5.2
-Release:        9
+Release:        11
 Summary:        Byte Code Engineering Library
 License:        ASL 2.0
 Source0:        %{name}-%{version}-src.tar.gz
