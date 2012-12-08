@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<depset>
+   <dependency>
+      <maven>
+         <groupId>regexp</groupId>
+         <artifactId>regexp</artifactId>
+         <version>1.2</version>
+      </maven>
+      <jpp>
+         <groupId>JPP</groupId>
+         <artifactId>regexp</artifactId>
+         <jar>regexp.jar</jar>
+         <version>1.2</version>
+      </jpp>
+   </dependency>
+</depset>

@@ -1,9 +1,3 @@
 sources:
-  "bcel-5.2-build.xml:"	6c20e11eb9003d2d4e0925a8802b9f4d88ac346a
-  "bcel-5.2-jpp-depmap.xml:"	79ccb030f61b8f8bf496c87ddacb876287d39377
-  "bcel-5.2.pom:"	194ad93307adc0b16b885565388c1da924c1ee1b
-  "bcel-5.2-src.tar.gz:"	8dde8c8a04924285e5cdb6658b1fa62f3a243113
-  "bcel-jakarta-site2.tar.gz:"	b7ef20bccff16833aae331ed046d9d11d2228659
-  "pom-maven2jpp-depcat.xsl:"	5861cae5f65e559ece90a7342d182f5a534b65de
-  "pom-maven2jpp-mapdeps.xsl:"	a837c6d38ea6fb127ba5bf20d917c1e8af791120
-  "pom-maven2jpp-newdepmap.xsl:"	834413ffc7f650705ce65ca2c89100153142cd92
+  "bcel-5.2-src.tar.gz": 3b3d451664855b0c9aae15dd05b69bf1063d8a1d
+  "commons-build.tar.gz": a66dba4b254b55eb7d29c40af3b925f907b092bf
