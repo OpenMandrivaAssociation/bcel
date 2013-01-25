@@ -1,11 +1,14 @@
-%define section free
-%define gcj_support 1
+# In bootstrap, ant-junit is not yet available because ant in non-bootstrap
+# mode requires bcel
+# Other than not running unit tests, the bootstrap and non-bootstrap versions
+# of bcel are identical.
+%bcond_without bootstrap
 
 %define manual  0
 
 Name:           bcel
 Version:        5.2
-Release:        5
+Release:        6
 Epoch:          0
 Summary:        Byte Code Engineering Library
 License:        Apache Software License
@@ -22,21 +25,18 @@ Patch0:         %{name}-%{version}-project_properties.patch
 
 URL:            http://jakarta.apache.org/%{name}/
 Group:          Development/Java
-#Vendor:         JPackage Project
-#Distribution:   JPackage
 Requires:       regexp
 BuildRequires:  ant
 BuildRequires:  ant-nodeps
+%if %without bootstrap
 BuildRequires:  ant-junit
-BuildRequires:  junit
+BuildRequires:  junit3
+%endif
 BuildRequires:  java-rpmbuild >= 0:1.5
+BuildRequires:	java-1.6.0-openjdk
 BuildRequires:  regexp
 BuildRequires:  locales-en
-%if %{gcj_support}
-BuildRequires:  java-gcj-compat-devel
-%else
 Buildarch:      noarch
-%endif
 
 %description
 The Byte Code Engineering Library (formerly known as JavaClass) is
@@ -78,10 +78,15 @@ cp %{SOURCE6} build.xml
 %patch0 -b .sav
 
 %build
-export LC_ALL=ISO-8859-1
+export LC_ALL=en_US.ISO-8859-1
 export CLASSPATH=$(build-classpath regexp)
+export JAVA_HOME=%_prefix/lib/jvm/java-1.6.0
+%if %with bootstrap
+export OPT_JAR_LIST="ant/ant-nodeps"
+%else
 export OPT_JAR_LIST="ant/ant-nodeps ant/ant-junit junit"
-%{ant} -Dbuild.dest=./build -Dbuild.dir=./build -Dname=%{name} compile jar javadoc
+%endif
+ant -Dbuild.dest=./build -Dbuild.dir=./build -Dname=%{name} compile jar javadoc
 
 %install
 %{__rm} -rf %{buildroot}
@@ -105,25 +110,11 @@ export OPT_JAR_LIST="ant/ant-nodeps ant/ant-junit junit"
 cp -a dist/docs/api/* %{buildroot}%{_javadocdir}/%{name}-%{version}
 %{__rm} -rf docs/api
 
-%if %{gcj_support}
-%{_bindir}/aot-compile-rpm
-%endif
-
-%clean
-%{__rm} -rf %{buildroot}
-
-
 %post
 %update_maven_depmap
-%if %{gcj_support}
-%{update_gcjdb}
-%endif
 
 %postun
 %update_maven_depmap
-%if %{gcj_support}
-%{clean_gcjdb}
-%endif
 
 %files
 %defattr(0644,root,root,0755)
@@ -132,10 +123,6 @@ cp -a dist/docs/api/* %{buildroot}%{_javadocdir}/%{name}-%{version}
 %{_datadir}/maven2/poms/*
 #%{_datadir}/maven2/default_poms/*
 %{_mavendepmapfragdir}
-%if %{gcj_support}
-%dir %{_libdir}/gcj/%{name}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/*
-%endif
 
 %files javadoc
 %defattr(0644,root,root,0755)
