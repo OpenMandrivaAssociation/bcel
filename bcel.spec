@@ -33,7 +33,7 @@ BuildRequires:  ant-junit
 BuildRequires:  junit3
 %endif
 BuildRequires:  java-rpmbuild >= 0:1.5
-BuildRequires:	java-1.6.0-openjdk
+BuildRequires:	java-1.6.0-openjdk-devel
 BuildRequires:  regexp
 BuildRequires:  locales-en
 Buildarch:      noarch
