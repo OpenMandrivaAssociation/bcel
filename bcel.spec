@@ -8,7 +8,7 @@
 
 Name:           bcel
 Version:        5.2
-Release:        8
+Release:        9
 Epoch:          0
 Summary:        Byte Code Engineering Library
 License:        Apache Software License
