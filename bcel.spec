@@ -1,42 +1,20 @@
-# In bootstrap, ant-junit is not yet available because ant in non-bootstrap
-# mode requires bcel
-# Other than not running unit tests, the bootstrap and non-bootstrap versions
-# of bcel are identical.
-%bcond_without bootstrap
-
-%define manual  0
-
+%{?_javapackages_macros:%_javapackages_macros}
 Name:           bcel
 Version:        5.2
-Release:        10
+Release:        17.1%{?dist}
 Epoch:          0
 Summary:        Byte Code Engineering Library
-License:        Apache Software License
-Source0:        http://www.apache.org/dist/jakarta/%{name}/source/%{name}-%{version}-src.tar.gz
-Source1:        pom-maven2jpp-depcat.xsl
-Source2:        pom-maven2jpp-newdepmap.xsl
-Source3:        pom-maven2jpp-mapdeps.xsl
-Source4:        %{name}-%{version}-jpp-depmap.xml
-Source5:        commons-build.tar.gz
-Source6:        %{name}-%{version}-build.xml
-Source7:        %{name}-%{version}.pom
+License:        ASL 2.0
+URL:            http://commons.apache.org/proper/commons-bcel/
+Source0:        http://archive.apache.org/dist/commons/bcel/source/bcel-5.2-src.tar.gz
+# Upstream uses Maven 1, which is not available in Fedora.
+# The following is upstream project.xml converted to Maven 2/3.
+Source1:        %{name}-pom.xml
+BuildArch:      noarch
 
-Patch0:         %{name}-%{version}-project_properties.patch
-
-URL:            http://jakarta.apache.org/%{name}/
-Group:          Development/Java
-Requires:       regexp
-BuildRequires:  ant
-BuildRequires:  ant-nodeps
-%if %without bootstrap
-BuildRequires:  ant-junit
-BuildRequires:  junit3
-%endif
-BuildRequires:  java-rpmbuild >= 0:1.5
-BuildRequires:	java-1.6.0-openjdk-devel
-BuildRequires:  regexp
-BuildRequires:  locales-en
-Buildarch:      noarch
+BuildRequires:  maven-local
+BuildRequires:  mvn(regexp:regexp)
+BuildRequires:  mvn(org.apache.felix:maven-bundle-plugin)
 
 %description
 The Byte Code Engineering Library (formerly known as JavaClass) is
@@ -55,152 +33,137 @@ optimizers, obsfuscators and analysis tools, the most popular probably
 being the Xalan XSLT processor at Apache.
 
 %package javadoc
-Summary:        Javadoc for %{name}
-Group:          Development/Java
+Summary:        API documentation for %{name}
+Obsoletes:      %{name}-manual < %{version}-%{release}
 
 %description javadoc
-Javadoc for %{name}.
-
-%if %manual
-%package manual
-Summary:        Manual for %{name}
-Group:          Development/Java
-
-%description manual
-Documentation for %{name}.
-%endif
+This package provides %{summary}.
 
 %prep
 %setup -q
-gzip -dc %{SOURCE5} | tar xf -
-%remove_java_binaries
-cp %{SOURCE6} build.xml
-%patch0 -b .sav
+cp -p %{SOURCE1} pom.xml
+%mvn_alias : bcel:
+%mvn_file : %{name}
 
 %build
-export LC_ALL=en_US.ISO-8859-1
-export CLASSPATH=$(build-classpath regexp)
-export JAVA_HOME=%_prefix/lib/jvm/java-1.6.0
-%if %with bootstrap
-export OPT_JAR_LIST="ant/ant-nodeps"
-%else
-export OPT_JAR_LIST="ant/ant-nodeps ant/ant-junit junit"
-%endif
-ant -Dbuild.dest=./build -Dbuild.dir=./build -Dname=%{name} compile jar javadoc
+%mvn_build
 
 %install
-%{__rm} -rf %{buildroot}
-# jars
-%{__mkdir_p} %{buildroot}%{_javadir}
-%{__install} -m 644 target/bcel-%{version}.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
-(cd %{buildroot}%{_javadir} && for jar in *-%{version}*; do %{__ln_s} ${jar} `echo $jar| sed  "s|-%{version}||g"`; done)
+%mvn_install
 
-# depmap frags
-%add_to_maven_depmap %{name} %{name} %{version} JPP %{name}
-%add_to_maven_depmap org.apache.bcel %{name} %{version} JPP %{name}
-# pom
-%{__mkdir_p} %{buildroot}%{_datadir}/maven2/poms
-%{__install} -m 0644 %{SOURCE7} \
-    %{buildroot}%{_datadir}/maven2/poms/JPP-%{name}.pom
-#%{__mkdir_p} %{buildroot}%{_datadir}/maven2/default_poms
-#%{__install} -m 0644 %{SOURCE7} \
-#    %{buildroot}%{_datadir}/maven2/default_poms/JPP-%{name}.pom
-# javadoc
-%{__mkdir_p} %{buildroot}%{_javadocdir}/%{name}-%{version}
-cp -a dist/docs/api/* %{buildroot}%{_javadocdir}/%{name}-%{version}
-%{__rm} -rf docs/api
+%files -f .mfiles
+%doc README.txt
+%doc LICENSE.txt NOTICE.txt
 
-%post
-%update_maven_depmap
-
-%postun
-%update_maven_depmap
-
-%files
-%defattr(0644,root,root,0755)
-%doc LICENSE.txt 
-%{_javadir}/*
-%{_datadir}/maven2/poms/*
-#%{_datadir}/maven2/default_poms/*
-%{_mavendepmapfragdir}
-
-%files javadoc
-%defattr(0644,root,root,0755)
-%{_javadocdir}/%{name}-%{version}
-
-%if %manual
-%files manual
-%defattr(0644,root,root,0755)
-%doc docs/*
-%endif
-
-
+%files javadoc -f .mfiles-javadoc
+%doc LICENSE.txt NOTICE.txt
 
 %changelog
-* Tue Nov 30 2010 Oden Eriksson <oeriksson@mandriva.com> 0:5.2-3.0.7mdv2011.0
-+ Revision: 603757
-- rebuild
+* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:5.2-17
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
-* Tue Mar 16 2010 Oden Eriksson <oeriksson@mandriva.com> 0:5.2-3.0.6mdv2010.1
-+ Revision: 522189
-- rebuilt for 2010.1
+* Fri Jun 14 2013 Mikolaj Izdebski <mizdebsk@redhat.com> - 0:5.2-16
+- Complete spec file rewrite
+- Build with Maven instead of Ant
+- Remove manual subpackage
 
-* Sun Aug 09 2009 Oden Eriksson <oeriksson@mandriva.com> 0:5.2-3.0.5mdv2010.0
-+ Revision: 413159
-- rebuild
+* Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:5.2-15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
-* Fri Mar 06 2009 Antoine Ginies <aginies@mandriva.com> 0:5.2-3.0.4mdv2009.1
-+ Revision: 350205
-- 2009.1 rebuild
+* Tue Nov 13 2012 Tom Callaway <spot@fedoraproject.org> - 0:5.2-14
+- Package NOTICE.txt
 
-* Wed Jan 09 2008 Alexander Kurtakov <akurtakov@mandriva.org> 0:5.2-3.0.3mdv2008.1
-+ Revision: 147304
-- no package should install in default_poms except common-poms
+* Tue Aug 21 2012 Andy Grimm <agrimm@gmail.com> - 0:5.2-13
+- This package should not own _mavendepmapfragdir (RHBZ#850005)
+- Build with maven, and clean up deprecated spec constructs
+- Fix pom file (See http://jira.codehaus.org/browse/MEV-592)
 
-  + Olivier Blin <oblin@mandriva.com>
-    - restore BuildRoot
+* Wed Jul 18 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:5.2-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
-  + Thierry Vignaud <tv@mandriva.org>
-    - kill re-definition of %%buildroot on Pixel's request
+* Sun Jun 24 2012 Gerard Ryan <galileo@fedoraproject.org> - 0:5.2-11
+- Inject OSGI Manifest.
 
-* Sun Dec 16 2007 Anssi Hannula <anssi@mandriva.org> 0:5.2-3.0.2mdv2008.1
-+ Revision: 120834
-- buildrequire java-rpmbuild, i.e. build with icedtea on x86(_64)
+* Wed Jan 11 2012 Ville Skyttä <ville.skytta@iki.fi> - 0:5.2-10
+- Specify explicit source encoding to fix build with Java 7.
+- Install jar and javadocs unversioned.
+- Crosslink with JDK javadocs.
 
-* Sun Dec 09 2007 Alexander Kurtakov <akurtakov@mandriva.org> 0:5.2-3.0.1mdv2008.1
-+ Revision: 116744
-- add maven poms and fragments (sync with jpp)
+* Mon Feb 07 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:5.2-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 
-* Sat Sep 15 2007 Anssi Hannula <anssi@mandriva.org> 0:5.2-1.5mdv2008.0
-+ Revision: 87224
-- rebuild to filter out autorequires of GCJ AOT objects
-- remove unnecessary Requires(post) on java-gcj-compat
+* Tue Jul 13 2010 Alexander Kurtakov <akurtako@redhat.com> 0:5.2-8
+- Use global.
+- Drop gcj_support.
+- Fix groups.
+- Fix build.
 
-* Sat Sep 08 2007 Pascal Terjan <pterjan@mandriva.org> 0:5.2-1.4mdv2008.0
-+ Revision: 82703
-- Make the package submitable
-- update to new version
+* Fri Jul 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:5.2-7.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
 
-  + Adam Williamson <awilliamson@mandriva.org>
-    - rebuild for 2008
-    - Fedora license policy
+* Mon Feb 23 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:5.2-6.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
 
+* Thu Dec 04 2008 Permaine Cheung <pcheung at redhat.com> 0:5.2-5.1
+- Do not install poms in /usr/share/maven2/default_poms
 
-* Thu Mar 08 2007 David Walluck <walluck@mandriva.org> 5.2-1.2mdv2007.1
-+ Revision: 134930
-- BuildRequires: ant-nodeps
-- 5.2
-- Import bcel
+* Wed Jul  9 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 0:5.2-5
+- drop repotag
 
-* Sun Jul 23 2006 David Walluck <walluck@mandriva.org> 0:5.1-6.1mdv2007.0
-- bump release
+* Tue Feb 19 2008 Fedora Release Engineering <rel-eng@fedoraproject.org> - 0:5.2-4jpp.2
+- Autorebuild for GCC 4.3
 
-* Sun Jun 04 2006 David Walluck <walluck@mandriva.org> 0:5.1-5.2mdv2007.0
-- rebuild for libgcj.so.
-- aot-compile
+* Tue Jan 22 2008 Permaine Cheung <pcheung at redhat.com> 0:5.2-3jpp.1
+- Merge with upstream
 
-* Sun May 08 2005 David Walluck <walluck@mandriva.org> 0:5.1-5.1mdk
-- release
+* Mon Jan 07 2008 Permaine Cheung <pcheung at redhat.com> 0:5.2-2jpp.2
+- Fixed unowned directory (Bugzilla 246185)
+
+* Fri Nov 16 2007 Ralph Apel <r.apel@r-apel.de> 0:5.2-3jpp
+- Install poms unconditionally
+- Add pom in ./maven2/default_poms
+- Add org.apache.bcel:bcel depmap frag
+
+* Wed Sep 19 2007 Permaine Cheung <pcheung at redhat.com> 0:5.2-2jpp.1
+- Update to 5.2 in Fedora
+
+* Mon Sep  4 2007 Jason Corley <jason.corley@gmail.com> 0:5.2-2jpp
+- use official 5.2 release tarballs and location
+- change vendor and distribution to macros
+- add missing requires on and maven-plugin-test, maven-plugins-base, and
+  maven-plugin-xdoc 
+- macro bracket fixes
+- remove demo subpackage (examples are not included in the distribution tarball)
+- build in mock
+
+* Wed Jun 27 2007 Ralph Apel <r.apel@r-apel.de> 0:5.2-1jpp
+- Upgrade to 5.2
+- Drop bootstrap option: not necessary any more
+- Add pom and depmap frags
+
+* Fri Feb 09 2007 Ralph Apel <r.apel@r-apel.de> 0:5.1-10jpp
+- Fix empty-%%post and empty-%%postun
+- Fix no-cleaning-of-buildroot
+
+* Fri Feb 09 2007 Ralph Apel <r.apel@r-apel.de> 0:5.1-9jpp
+- Optionally build without maven
+- Add bootstrap option
+
+* Thu Aug 10 2006 Matt Wringe <mwringe at redhat.com> 0:5.1-8jpp
+- Add missing requires for Javadoc task
+
+* Sun Jul 23 2006 Matt Wringe <mwringe at redhat.com> 0:5.1-7jpp
+- Add conditional native compilation
+- Change spec file encoding from ISO-8859-1 to UTF-8
+- Add missing BR werken.xpath and ant-apache-regexp
+
+* Tue Apr 11 2006 Ralph Apel <r.apel@r-apel.de> 0:5.1-6jpp
+- First JPP-1.7 release
+- Use tidyed sources from svn
+- Add resources to build the manual
+- Add examples to -demo subpackage
+- Build with maven by default
+- Add option to build with straight ant
 
 * Fri Nov 19 2004 David Walluck <david@jpackage.org> 0:5.1-5jpp
 - rebuild to fix packager
@@ -208,9 +171,54 @@ cp -a dist/docs/api/* %{buildroot}%{_javadocdir}/%{name}-%{version}
 * Sat Nov 06 2004 David Walluck <david@jpackage.org> 0:5.1-4jpp
 - rebuild with javac 1.4.2
 
-* Sun Oct 17 2004 David Walluck <david@jpackage.org> 0:5.1-3jpp
+* Sat Oct 16 2004 David Walluck <david@jpackage.org> 0:5.1-3jpp
 - rebuild for JPackage 1.6
 
-* Sat Aug 21 2004 Ralph Apel <r.apel at r-apel.de> 0:5.1-2jpp
+* Fri Aug 20 2004 Ralph Apel <r.apel at r-apel.de> 0:5.1-2jpp
 - Build with ant-1.6.2
 
+* Sun May 11 2003 David Walluck <david@anti-microsoft.org> 0:5.1-1jpp
+- 5.1
+- update for JPackage 1.5
+
+* Mon Mar 24 2003 Nicolas Mailhot <Nicolas.Mailhot (at) JPackage.org> - 5.0-6jpp
+- For jpackage-utils 1.5
+
+* Tue Feb 25 2003 Ville Skyttä <ville.skytta@iki.fi> - 5.0-5jpp
+- Rebuild to get docdir right on modern distros.
+- Fix License tag and source file perms.
+- Built with IBM's 1.3.1SR3 (doesn't build with Sun's 1.4.1_01).
+
+* Tue Jun 11 2002 Henri Gomez <hgomez@slib.fr> 5.0-4jpp
+- use sed instead of bash 2.x extension in link area to make spec compatible
+  with distro using bash 1.1x
+
+* Tue May 07 2002 Guillaume Rousse <guillomovitch@users.sourceforge.net> 5.0-3jpp 
+- vendor, distribution, group tags
+
+* Wed Jan 23 2002 Guillaume Rousse <guillomovitch@users.sourceforge.net> 5.0-2jpp 
+- section macro
+- no dependencies for manual and javadoc package
+
+* Tue Jan 22 2002 Henri Gomez <hgomez@slib.fr> 5.0-1jpp
+- bcel is now a jakarta apache project
+- dependency on jakarta-regexp instead of gnu.regexp 
+- created manual package
+
+* Sat Dec 8 2001 Guillaume Rousse <guillomovitch@users.sourceforge.net> 4.4.1-2jpp
+- javadoc into javadoc package
+- Requires: and BuildRequires: gnu.regexp
+
+* Wed Nov 21 2001 Christian Zoffoli <czoffoli@littlepenguin.org> 4.4.1-1jpp
+- removed packager tag
+- new jpp extension
+- 4.4.1
+
+* Thu Oct 11 2001 Guillaume Rousse <guillomovitch@users.sourceforge.net> 4.4.0-2jpp
+- first unified release
+- used lower case for name
+- used original tarball
+- s/jPackage/JPackage
+
+* Mon Aug 27 2001 Guillaume Rousse <guillomovitch@users.sourceforge.net> 4.4.0-1mdk
+- first Mandrake release
