@@ -1,3 +1,2 @@
 sources:
-  "bcel-5.2-src.tar.gz": 3b3d451664855b0c9aae15dd05b69bf1063d8a1d
-  "commons-build.tar.gz": a66dba4b254b55eb7d29c40af3b925f907b092bf
+  bcel-5.2-src.tar.gz: 3b3d451664855b0c9aae15dd05b69bf1063d8a1d
