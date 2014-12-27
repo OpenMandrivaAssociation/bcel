@@ -1,12 +1,20 @@
 %{?_javapackages_macros:%_javapackages_macros}
+%global svnrev 1592769
+
 Name:           bcel
-Version:        5.2
-Release:        17.1%{?dist}
+Version:        6.0
+Release:        0.3.20140406svn%{svnrev}.1
 Epoch:          0
 Summary:        Byte Code Engineering Library
+Group:		Development/Java
 License:        ASL 2.0
 URL:            http://commons.apache.org/proper/commons-bcel/
-Source0:        http://archive.apache.org/dist/commons/bcel/source/bcel-5.2-src.tar.gz
+# Source for releases:
+# Source0:        http://archive.apache.org/dist/commons/bcel/source/bcel-%{version}-src.tar.gz
+
+# svn export http://svn.apache.org/repos/asf/commons/proper/bcel/trunk bcel
+# tar cJf bcel-1592769.tar.xz bcel
+Source0:        bcel-%{svnrev}.tar.xz
 # Upstream uses Maven 1, which is not available in Fedora.
 # The following is upstream project.xml converted to Maven 2/3.
 Source1:        %{name}-pom.xml
@@ -40,10 +48,14 @@ Obsoletes:      %{name}-manual < %{version}-%{release}
 This package provides %{summary}.
 
 %prep
-%setup -q
+%setup -q -n %{name}
 cp -p %{SOURCE1} pom.xml
-%mvn_alias : bcel:
+%mvn_alias : bcel: apache:
 %mvn_file : %{name}
+
+# different path in test
+sed -i '\|lib/dt\.jar|s|javaHome|javaHome.substring(0, javaHome.length() - 4)|' \
+        src/test/java/org/apache/bcel/PerformanceTest.java
 
 %build
 %mvn_build
@@ -59,6 +71,15 @@ cp -p %{SOURCE1} pom.xml
 %doc LICENSE.txt NOTICE.txt
 
 %changelog
+* Mon Aug 11 2014 Mikolaj Izdebski <mizdebsk@redhat.com> - 0:6.0-0.3.20140406svn1592769
+- Add alias for apache:bcel
+
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:6.0-0.2.20140406svn1592769
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
+* Tue May 06 2014 Michael Simacek <msimacek@redhat.com> - 0:6.0-0.1.20140406svn1592769
+- Update to upstream snapshot compatible with Java 8
+
 * Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:5.2-17
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
@@ -222,3 +243,4 @@ cp -p %{SOURCE1} pom.xml
 
 * Mon Aug 27 2001 Guillaume Rousse <guillomovitch@users.sourceforge.net> 4.4.0-1mdk
 - first Mandrake release
+
