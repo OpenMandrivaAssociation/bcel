@@ -12,7 +12,7 @@ Source0:        http://archive.apache.org/dist/commons/bcel/source/bcel-%{versio
 # SVN repository lives at
 # svn export http://svn.apache.org/repos/asf/commons/proper/bcel/trunk bcel
 BuildArch:      noarch
-
+BuildRequires:	jdk-current
 
 %description
 The Byte Code Engineering Library (formerly known as JavaClass) is
