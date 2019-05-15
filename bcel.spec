@@ -43,6 +43,7 @@ This package provides %{summary}.
 %build
 . %{_sysconfdir}/profile.d/90java.sh
 export PATH=$JAVA_HOME/bin:$PATH
+export LANG=en_US.utf-8
 
 buildjar() {
 	MODULE="$1"
