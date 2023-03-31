@@ -2,7 +2,7 @@
 
 Name:           bcel
 Version:        6.3.1
-Release:        1
+Release:        2
 Summary:        Byte Code Engineering Library
 Group:		Development/Java
 License:        ASL 2.0
