@@ -6,7 +6,7 @@ Release:        2
 Summary:        Byte Code Engineering Library
 Group:		Development/Java
 License:        ASL 2.0
-URL:            http://commons.apache.org/proper/commons-bcel/
+URL:            https://commons.apache.org/proper/commons-bcel/
 # Source for releases:
 Source0:        http://archive.apache.org/dist/commons/bcel/source/bcel-%{version}-src.tar.gz
 # SVN repository lives at
